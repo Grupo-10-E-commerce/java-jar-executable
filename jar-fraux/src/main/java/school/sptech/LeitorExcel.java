@@ -1,15 +1,17 @@
 package school.sptech;
 
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 
 public class LeitorExcel {
 
@@ -59,7 +61,7 @@ public class LeitorExcel {
     private void printarCabecalho(Row row) {
         printarLinhas();
         System.out.println("Lendo cabeçalho");
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 7; i++) {
             String coluna = row.getCell(i).getStringCellValue();
             System.out.println("Coluna " + i + ": " + coluna);
         }
