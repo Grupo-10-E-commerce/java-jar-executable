@@ -1,5 +1,6 @@
 package school.sptech;
 
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -15,7 +16,7 @@ import java.util.List;
 
 public class LeitorExcel {
 
-    public List<Compra> extrairLivros(String credit_card_fraud_dataset) {
+    public List<Compra> extrairCompras(String credit_card_fraud_dataset) {
         List<Compra> compras = new ArrayList<>();
 
         try (
@@ -34,13 +35,26 @@ public class LeitorExcel {
 
                 // Extraindo valor das células e criando objeto Livro
                 System.out.println("Lendo linha " + row.getRowNum());
+                Compra compra = new Compra();
 
                 Integer TransactionID = (int) row.getCell(0).getNumericCellValue();
                 LocalDateTime TransactionDate = row.getCell(1).getLocalDateTimeCellValue();
                 Double Amount = row.getCell(2).getNumericCellValue();
                 Integer MerchantID = (int) row.getCell(3).getNumericCellValue();
-                String TransactionType = row.getCell(4).getStringCellValue();
-                String Location = row.getCell(5).getStringCellValue();
+                if(row.getCell(4).getCellType() == CellType.STRING){
+                    String TransactionType = row.getCell(4).getStringCellValue();
+                } else if (row.getCell(4).getCellType() == CellType.STRING) {
+                    String TransactionType = row.getCell(4).getStringCellValue();
+                }else {
+                    String TransactionType = null;
+                }
+                if(row.getCell(5).getCellType() == CellType.STRING){
+                    String Location = row.getCell(5).getStringCellValue();
+                } else if (row.getCell(5).getCellType() == CellType.STRING) {
+                    String Location = row.getCell(5).getStringCellValue();
+                }else {
+                    String Location = null;
+                }
                 Boolean IsFraud = row.getCell(6).getBooleanCellValue();
 
 

@@ -9,7 +9,7 @@ public class Main {
 
         // Extraindo os livros do arquivo
         LeitorExcel leitorExcel = new LeitorExcel();
-        List<Compra> comprasList = leitorExcel.extrairLivros(nomeArquivo);
+        List<Compra> comprasList = leitorExcel.extrairCompras(nomeArquivo);
 
         System.out.println("Compras extraídas:");
         for (Compra compra : comprasList) {
