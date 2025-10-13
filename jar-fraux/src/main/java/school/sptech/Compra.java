@@ -25,4 +25,5 @@ public class Compra {
         Location = location;
         IsFraud = isFraud;
     }
+
 }
