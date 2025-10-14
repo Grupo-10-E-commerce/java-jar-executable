@@ -1,12 +1,9 @@
 package school.sptech;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
 public class Compra {
 
     private Integer TransactionID;
-    private LocalDateTime TransactionDate;
+    private String TransactionDate;
     private Double Amount;
     private Integer MerchantID;
     private String TransactionType;
@@ -16,7 +13,7 @@ public class Compra {
     public Compra() {
     }
 
-    public Compra(Integer transactionID, LocalDateTime transactionDate, Double amount, Integer merchantID, String transactionType, String location, Boolean isFraud) {
+    public Compra(Integer transactionID, String transactionDate, Double amount, Integer merchantID, String transactionType, String location, Boolean isFraud) {
         TransactionID = transactionID;
         TransactionDate = transactionDate;
         Amount = amount;
@@ -26,4 +23,17 @@ public class Compra {
         IsFraud = isFraud;
     }
 
+    @Override
+    public String toString() {
+        return "Compra{" +
+                "TransactionID=" + TransactionID +
+                ", TransactionDate='" + TransactionDate + '\'' +
+                ", Amount=" + Amount +
+                ", MerchantID=" + MerchantID +
+                ", TransactionType='" + TransactionType + '\'' +
+                ", Location='" + Location + '\'' +
+                ", IsFraud=" + IsFraud +
+                '}';
+    }
 }
+
