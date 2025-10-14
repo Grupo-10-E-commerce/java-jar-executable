@@ -3,7 +3,6 @@ package school.sptech;
 import java.util.List;
 
 public class Main {
-
     public static void main(String[] args) {
         String nomeArquivo = "credit_card_fraud_dataset.xlsx";
 
@@ -13,7 +12,8 @@ public class Main {
 
         System.out.println("Compras extraídas:");
         for (Compra compra : comprasList) {
-            System.out.println(compra);
+            System.out.println(compra.toString());
         }
+
     }
 }
