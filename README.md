@@ -14,18 +14,15 @@ Ele foi desenvolvido com foco em:
 
 ## 🧱 Tecnologias Utilizadas
 
-- Java (versão: X.Y ou conforme definida no build)  
-- Sistema de build: Maven ou Gradle (especifique)  
-- Dependências externas (listar principais, se houver)  
-- Empacotamento: JAR executável (*“fat JAR” ou *uber-jar*)  
+- Java (versão: 21)  
+- Sistema de build: Maven 
 
 
 ## 🚀 Como Executar
 
 ### 1. Pré-requisitos  
 - Instalar Java JDK (versão compatível)  
-- Ter o arquivo JAR gerado (localizado em `jar-fraux/` ou conforme build)  
-- (Opcional) Variáveis de ambiente configuradas se a aplicação requerer  
+- Ter o arquivo JAR gerado (localizado em `jar-fraux/target`)  
 
 ### 2. Executar o JAR  
 ```bash
