@@ -1,5 +1,4 @@
 # java-jar-executable
-# java-jar-executable
 
 Repositório contendo o artefato executável (JAR) da aplicação Java desenvolvida pelo Grupo 10 – E-commerce.
 
