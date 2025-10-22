@@ -35,5 +35,61 @@ public class Compra {
                 ", IsFraud=" + IsFraud +
                 '}';
     }
+
+    public Integer getTransactionID() {
+        return TransactionID;
+    }
+
+    public void setTransactionID(Integer transactionID) {
+        TransactionID = transactionID;
+    }
+
+    public String getTransactionDate() {
+        return TransactionDate;
+    }
+
+    public void setTransactionDate(String transactionDate) {
+        TransactionDate = transactionDate;
+    }
+
+    public Double getAmount() {
+        return Amount;
+    }
+
+    public void setAmount(Double amount) {
+        Amount = amount;
+    }
+
+    public Integer getMerchantID() {
+        return MerchantID;
+    }
+
+    public void setMerchantID(Integer merchantID) {
+        MerchantID = merchantID;
+    }
+
+    public String getTransactionType() {
+        return TransactionType;
+    }
+
+    public void setTransactionType(String transactionType) {
+        TransactionType = transactionType;
+    }
+
+    public String getLocation() {
+        return Location;
+    }
+
+    public void setLocation(String location) {
+        Location = location;
+    }
+
+    public Boolean getFraud() {
+        return IsFraud;
+    }
+
+    public void setFraud(Boolean fraud) {
+        IsFraud = fraud;
+    }
 }
 
