@@ -2,94 +2,94 @@ package school.sptech;
 
 public class Compra {
 
-    private Integer TransactionID;
-    private String TransactionDate;
-    private Double Amount;
-    private Integer MerchantID;
-    private String TransactionType;
-    private String Location;
-    private Boolean IsFraud;
+    private Integer id_compra;
+    private String data_hora_transacao;
+    private Double valor_transacao;
+    private Integer id_empresa;
+    private String tipo_transacao;
+    private String cidade;
+    private Integer fraude;
 
     public Compra() {
     }
 
-    public Compra(Integer transactionID, String transactionDate, Double amount, Integer merchantID, String transactionType, String location, Boolean isFraud) {
-        TransactionID = transactionID;
-        TransactionDate = transactionDate;
-        Amount = amount;
-        MerchantID = merchantID;
-        TransactionType = transactionType;
-        Location = location;
-        IsFraud = isFraud;
+    public Compra(Integer id_compra, String data_hora_transacao, Double valor_transacao, Integer id_empresa, String tipo_transacao, String cidade, Integer fraude) {
+        id_compra = id_compra;
+        data_hora_transacao = data_hora_transacao;
+        valor_transacao = valor_transacao;
+        id_empresa = id_empresa;
+        tipo_transacao = tipo_transacao;
+        cidade = cidade;
+        fraude = fraude;
     }
 
     @Override
     public String toString() {
         return "Compra{" +
-                "TransactionID=" + TransactionID +
-                ", TransactionDate='" + TransactionDate + '\'' +
-                ", Amount=" + Amount +
-                ", MerchantID=" + MerchantID +
-                ", TransactionType='" + TransactionType + '\'' +
-                ", Location='" + Location + '\'' +
-                ", IsFraud=" + IsFraud +
+                "TransactionID=" + id_compra +
+                ", TransactionDate='" + data_hora_transacao + '\'' +
+                ", Amount=" + valor_transacao +
+                ", MerchantID=" + id_empresa +
+                ", TransactionType='" + tipo_transacao + '\'' +
+                ", Location='" + cidade + '\'' +
+                ", IsFraud=" + fraude +
                 '}';
     }
 
-    public Integer getTransactionID() {
-        return TransactionID;
+    public Integer getId_compra() {
+        return id_compra;
     }
 
-    public void setTransactionID(Integer transactionID) {
-        TransactionID = transactionID;
+    public void setId_compra(Integer id_compra) {
+        this.id_compra = id_compra;
     }
 
-    public String getTransactionDate() {
-        return TransactionDate;
+    public String getData_hora_transacao() {
+        return data_hora_transacao;
     }
 
-    public void setTransactionDate(String transactionDate) {
-        TransactionDate = transactionDate;
+    public void setData_hora_transacao(String data_hora_transacao) {
+        this.data_hora_transacao = data_hora_transacao;
     }
 
-    public Double getAmount() {
-        return Amount;
+    public Double getValor_transacao() {
+        return valor_transacao;
     }
 
-    public void setAmount(Double amount) {
-        Amount = amount;
+    public void setValor_transacao(Double valor_transacao) {
+        this.valor_transacao = valor_transacao;
     }
 
-    public Integer getMerchantID() {
-        return MerchantID;
+    public Integer getId_empresa() {
+        return id_empresa;
     }
 
-    public void setMerchantID(Integer merchantID) {
-        MerchantID = merchantID;
+    public void setId_empresa(Integer id_empresa) {
+        this.id_empresa = id_empresa;
     }
 
-    public String getTransactionType() {
-        return TransactionType;
+    public String getTipo_transacao() {
+        return tipo_transacao;
     }
 
-    public void setTransactionType(String transactionType) {
-        TransactionType = transactionType;
+    public void setTipo_transacao(String tipo_transacao) {
+        this.tipo_transacao = tipo_transacao;
     }
 
-    public String getLocation() {
-        return Location;
+    public String getCidade() {
+        return cidade;
     }
 
-    public void setLocation(String location) {
-        Location = location;
+    public void setCidade(String cidade) {
+        this.cidade = cidade;
     }
 
-    public Boolean getFraud() {
-        return IsFraud;
+    public Integer getFraude() {
+        return fraude;
     }
 
-    public void setFraud(Boolean fraud) {
-        IsFraud = fraud;
+    public void setFraude(Integer fraude) {
+        this.fraude = fraude;
     }
 }
 

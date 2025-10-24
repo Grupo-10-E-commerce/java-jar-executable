@@ -35,36 +35,31 @@ public class LeitorExcel {
                 // Extraindo valor das células e criando objeto Livro
                 System.out.println("Lendo linha " + row.getRowNum());
 
-                Integer TransactionID = (int) row.getCell(0).getNumericCellValue();
+                Integer id_compra = (int) row.getCell(0).getNumericCellValue();
 
-                String TransactionDate = row.getCell(1).getStringCellValue();
+                String data_hora_transacao = row.getCell(1).getStringCellValue();
 
-                Double Amount = row.getCell(2).getNumericCellValue();
-                Integer MerchantID = (int) row.getCell(3).getNumericCellValue();
-                String TransactionType = "";
+                Double valor_transacao = row.getCell(2).getNumericCellValue();
+                Integer id_empresa = (int) row.getCell(3).getNumericCellValue();
+                String tipo_transacao = "";
                 if(row.getCell(4).getCellType() == CellType.STRING){
-                    TransactionType = row.getCell(4).getStringCellValue();
+                    tipo_transacao = row.getCell(4).getStringCellValue();
                 } else if (row.getCell(4).getCellType() == CellType.STRING) {
-                    TransactionType = row.getCell(4).getStringCellValue();
+                    tipo_transacao = row.getCell(4).getStringCellValue();
                 }else {
-                    TransactionType = null;
+                    tipo_transacao = null;
                 }
-                String Location = "";
+                String cidade = "";
                 if(row.getCell(5).getCellType() == CellType.STRING){
-                    Location = row.getCell(5).getStringCellValue();
+                    cidade = row.getCell(5).getStringCellValue();
                 } else if (row.getCell(5).getCellType() == CellType.STRING) {
-                    Location = row.getCell(5).getStringCellValue();
+                    cidade = row.getCell(5).getStringCellValue();
                 }else {
-                    Location = null;
+                    cidade = null;
                 }
-                Boolean IsFraud;
-                if (row.getCell(6).getNumericCellValue() == 0.) {
-                    IsFraud = false;
-                } else {
-                    IsFraud = true;
-                }
+                Integer fraude = (int) row.getCell(6).getNumericCellValue();
 
-                Compra compra = new Compra(TransactionID, TransactionDate, Amount, MerchantID, TransactionType, Location, IsFraud);
+                Compra compra = new Compra(id_compra, data_hora_transacao, valor_transacao, id_empresa, tipo_transacao, cidade, fraude);
                 compras.add(compra);
             }
 

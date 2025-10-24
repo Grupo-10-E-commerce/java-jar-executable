@@ -19,15 +19,15 @@ public class Main {
 
         System.out.println("Compras extraídas:");
         for (int i = 0; i < comprasList.size(); i++) {
-            Integer TransactionID = comprasList.get(i).getTransactionID();
-            String TransactionDate = comprasList.get(i).getTransactionDate();
-            Double Amount = comprasList.get(i).getAmount();
-            Integer MerchantID = comprasList.get(i).getMerchantID();
-            String TransactionType = comprasList.get(i).getTransactionType();
-            String Location = comprasList.get(i).getLocation();
-            Boolean IsFraud = comprasList.get(i).getFraud();
+            Integer TransactionID = comprasList.get(i).getId_compra();
+            String TransactionDate = comprasList.get(i).getData_hora_transacao();
+            Double Amount = comprasList.get(i).getValor_transacao();
+            Integer MerchantID = comprasList.get(i).getId_empresa();
+            String TransactionType = comprasList.get(i).getTipo_transacao();
+            String Location = comprasList.get(i).getCidade();
+            Integer IsFraud = comprasList.get(i).getFraude();
             connection.update("INSERT INTO compra VALUES (?,?,?,?,?,?,?)", TransactionID, TransactionDate, Amount, MerchantID, TransactionType, Location, IsFraud);
-            connection.update("INSERT INTO logs VALUES (Default, ?, Default)", "Compra : " + TransactionID + " Inserida com sucesso");
+            //connection.update("INSERT INTO logs VALUES (Default, ?, Default)", "Compra : " + TransactionID + " Inserida com sucesso");
         }
 
     }

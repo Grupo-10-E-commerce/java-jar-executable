@@ -13,7 +13,7 @@ public class ConexaoBD {
 
         BasicDataSource basicDataSource = new BasicDataSource();
 
-        basicDataSource.setUrl("jdbc:mysql://localhost:3306/frauxTeste");
+        basicDataSource.setUrl("jdbc:mysql://localhost:3306/Fraux");
         basicDataSource.setUsername("root");
         basicDataSource.setPassword("");
 
