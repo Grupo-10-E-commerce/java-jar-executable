@@ -15,7 +15,7 @@ public class ConexaoBD {
 
         basicDataSource.setUrl("jdbc:mysql://localhost:3306/Fraux");
         basicDataSource.setUsername("root");
-        basicDataSource.setPassword("urubu100");
+        basicDataSource.setPassword("");
 
         this.conexao = basicDataSource;
     }

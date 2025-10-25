@@ -15,15 +15,15 @@ import java.util.List;
 
 public class LeitorExcel {
 
-    public List<Compra> extrairCompras(String credit_card_fraud_dataset) {
+    public List<Compra> extrairCompras(String requisicao) {
         List<Compra> compras = new ArrayList<>();
 
         try (
-                InputStream arquivo = new FileInputStream(credit_card_fraud_dataset);
+                InputStream arquivo = new FileInputStream(requisicao);
                 Workbook workbook = new XSSFWorkbook(arquivo) // caso seja .xls troque para HSSFWorkbook
         ) {
 
-            System.out.printf("Iniciando leitura do arquivo %s%n", credit_card_fraud_dataset);
+            System.out.printf("Iniciando leitura do arquivo %s%n", requisicao);
 
             Sheet sheet = workbook.getSheetAt(0);
             for (Row row : sheet) {

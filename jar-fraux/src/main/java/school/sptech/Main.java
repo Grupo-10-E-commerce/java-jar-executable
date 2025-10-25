@@ -16,16 +16,87 @@ import java.util.List;
 import java.util.UUID;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         ConexaoBD conexaoBD = new ConexaoBD();
         JdbcTemplate connection = conexaoBD.getConnection();
 
-        String nomeArquivo = "credit_card_fraud_dataset.xlsx";
+        S3Client s3Client = new S3Provider().getS3Client();
+        String bucketName = "bucket-fraux-teste";
+
+        try {
+            CreateBucketRequest createBucketRequest = CreateBucketRequest.builder()
+                    .bucket(bucketName)
+                    .build();
+            s3Client.createBucket(createBucketRequest);
+            System.out.println("Bucket criado com sucesso: " + bucketName);
+        } catch (S3Exception e) {
+            System.err.println("Erro ao criar o bucket: " + e.getMessage());
+        }
+
+        try {
+            List<Bucket> buckets = s3Client.listBuckets().buckets();
+            System.out.println("Lista de buckets:");
+            for (Bucket bucket : buckets) {
+                System.out.println("- " + bucket.name());
+            }
+        } catch (S3Exception e) {
+            System.err.println("Erro ao listar buckets: " + e.getMessage());
+        }
+
+        try {
+            ListObjectsRequest requisicao = ListObjectsRequest.builder()
+                    .bucket(bucketName)
+                    .build();
+
+            List<S3Object> objects = s3Client.listObjects(requisicao).contents();
+            System.out.println("Objetos no bucket " + bucketName + ":");
+            for (S3Object object : objects) {
+                System.out.println("- " + object.key());
+            }
+        } catch (S3Exception e) {
+            System.err.println("Erro ao listar objetos no bucket: " + e.getMessage());
+        }
+
+        try {
+            String uniqueFileName = UUID.randomUUID().toString();
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(uniqueFileName)
+                    .build();
+
+            File file = new File("credit_card_fraud_dataset.xlsx");
+            s3Client.putObject(putObjectRequest, RequestBody.fromFile(file));
+
+            System.out.println("Arquivo '" + file.getName() + "' enviado com sucesso com o nome: " + uniqueFileName);
+        } catch (S3Exception e) {
+            System.err.println("Erro ao fazer upload do arquivo: " + e.getMessage());
+        }
+
+        InputStream inputStream = null;
+        try {
+            ListObjectsRequest requisicao = ListObjectsRequest.builder()
+                    .bucket(bucketName)
+                    .build();
+            List<S3Object> objects = s3Client.listObjects(requisicao).contents();
+            for (S3Object object : objects) {
+                GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(object.key())
+                        .build();
+
+                inputStream = s3Client.getObject(getObjectRequest, ResponseTransformer.toInputStream());
+                Files.copy(inputStream, new File(object.key()).toPath());
+                System.out.println("Arquivo baixado: " + object.key());
+            }
+        } catch (IOException | S3Exception e) {
+            System.err.println("Erro ao fazer download dos arquivos: " + e.getMessage());
+        }
+
 
         // Extraindo os livros do arquivo
         LeitorExcel leitorExcel = new LeitorExcel();
-        List<Compra> comprasList = leitorExcel.extrairCompras(nomeArquivo);
+        List<Compra> comprasList = leitorExcel.extrairCompras("067fd3e7-39f0-4cbc-9c75-410d4cc859eb");
 
         System.out.println("Compras extraídas:");
         for (int i = 0; i < comprasList.size(); i++) {
@@ -36,7 +107,7 @@ public class Main {
             String TransactionType = comprasList.get(i).getTipo_transacao();
             String Location = comprasList.get(i).getCidade();
             Integer IsFraud = comprasList.get(i).getFraude();
-            // connection.update("INSERT INTO compra VALUES (?,?,?,?,?,?,?)", TransactionID, TransactionDate, Amount, MerchantID, TransactionType, Location, IsFraud);
+            connection.update("INSERT INTO compra VALUES (Default,?,?,?,?,?,?,?)", TransactionID, MerchantID, TransactionDate, Amount, TransactionType, Location, IsFraud);
 
             // connection.update("INSERT INTO logs VALUES (Default, ?, Default)", "Compra : " + TransactionID + " Inserida com sucesso");
         }

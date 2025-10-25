@@ -14,25 +14,25 @@ public class Compra {
     }
 
     public Compra(Integer id_compra, String data_hora_transacao, Double valor_transacao, Integer id_empresa, String tipo_transacao, String cidade, Integer fraude) {
-        id_compra = id_compra;
-        data_hora_transacao = data_hora_transacao;
-        valor_transacao = valor_transacao;
-        id_empresa = id_empresa;
-        tipo_transacao = tipo_transacao;
-        cidade = cidade;
-        fraude = fraude;
+        this.id_compra = id_compra;
+        this.data_hora_transacao = data_hora_transacao;
+        this.valor_transacao = valor_transacao;
+        this.id_empresa = id_empresa;
+        this.tipo_transacao = tipo_transacao;
+        this.cidade = cidade;
+        this.fraude = fraude;
     }
 
     @Override
     public String toString() {
         return "Compra{" +
-                "TransactionID=" + id_compra +
-                ", TransactionDate='" + data_hora_transacao + '\'' +
-                ", Amount=" + valor_transacao +
-                ", MerchantID=" + id_empresa +
-                ", TransactionType='" + tipo_transacao + '\'' +
-                ", Location='" + cidade + '\'' +
-                ", IsFraud=" + fraude +
+                "id_compra=" + id_compra +
+                ", data_hora_transacao='" + data_hora_transacao + '\'' +
+                ", valor_transacao=" + valor_transacao +
+                ", id_empresa=" + id_empresa +
+                ", tipo_transacao='" + tipo_transacao + '\'' +
+                ", cidade='" + cidade + '\'' +
+                ", fraude=" + fraude +
                 '}';
     }
 
