@@ -1,5 +1,6 @@
 package school.sptech;
 
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import school.sptech.client.S3Provider;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -14,9 +15,12 @@ import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.time.format.DateTimeFormatter;
 
 public class Main {
     public static void main(String[] args) throws IOException {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         ConexaoBD conexaoBD = new ConexaoBD();
         JdbcTemplate connection = conexaoBD.getConnection();
@@ -96,22 +100,25 @@ public class Main {
 
         // Extraindo os livros do arquivo
         LeitorExcel leitorExcel = new LeitorExcel();
-        List<Compra> comprasList = leitorExcel.extrairCompras("067fd3e7-39f0-4cbc-9c75-410d4cc859eb");
+        List<Compra> comprasList = leitorExcel.extrairCompras("credit_card_fraud_dataset.xlsx");
 
         System.out.println("Compras extraídas:");
         for (int i = 0; i < comprasList.size(); i++) {
-            Integer TransactionID = comprasList.get(i).getId_compra();
-            String TransactionDate = comprasList.get(i).getData_hora_transacao();
-            Double Amount = comprasList.get(i).getValor_transacao();
-            Integer MerchantID = comprasList.get(i).getId_empresa();
-            String TransactionType = comprasList.get(i).getTipo_transacao();
-            String Location = comprasList.get(i).getCidade();
-            Integer IsFraud = comprasList.get(i).getFraude();
-            connection.update("INSERT INTO compra VALUES (Default,?,?,?,?,?,?,?)", TransactionID, MerchantID, TransactionDate, Amount, TransactionType, Location, IsFraud);
+            // Verifica se o dado já existe no banco pelo seu ID
+            if (connection.query("select * from compra where id_compra = ?", new BeanPropertyRowMapper<>(Compra.class), comprasList.get(i).getId_compra()).isEmpty()) {
+                Integer TransactionID = comprasList.get(i).getId_compra();
+                LocalDateTime TransactionDate = LocalDateTime.parse(comprasList.get(i).getData_hora_transacao().substring(0, 19), formatter);
+                Double Amount = comprasList.get(i).getValor_transacao();
+                Integer MerchantID = comprasList.get(i).getId_empresa();
+                String TransactionType = comprasList.get(i).getTipo_transacao();
+                String Location = comprasList.get(i).getCidade();
+                Integer IsFraud = comprasList.get(i).getFraude();
+                connection.update("INSERT INTO compra VALUES (Default,?,?,?,?,?,?,?)", TransactionID, MerchantID, TransactionDate, Amount, TransactionType, Location, IsFraud);
 
-            // connection.update("INSERT INTO logs VALUES (Default, ?, Default)", "Compra : " + TransactionID + " Inserida com sucesso");
+                //connection.update("INSERT INTO logs VALUES (Default, ?, Default)", "Compra : " + TransactionID + " Inserida com sucesso");
+            } else {
+                System.out.println("Dado: " + connection.query("select * from compra where id_compra = ?", new BeanPropertyRowMapper<>(Compra.class), comprasList.get(i).getId_compra()) + " já presente no banco");
+            }
         }
-
-
     }
 }
