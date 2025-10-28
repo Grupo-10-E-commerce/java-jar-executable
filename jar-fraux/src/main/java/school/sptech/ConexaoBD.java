@@ -12,9 +12,9 @@ public class ConexaoBD {
 
         BasicDataSource basicDataSource = new BasicDataSource();
 
-        basicDataSource.setUrl("jdbc:mysql://ip-privado:3306/Fraux?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC");
-        basicDataSource.setUsername("username");
-        basicDataSource.setPassword("SENHA");
+        basicDataSource.setUrl("jdbc:mysql://localhost:3306/Fraux?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC");
+        basicDataSource.setUsername("appuser");
+        basicDataSource.setPassword("APPSENHA123");
 
         this.conexao = basicDataSource;
     }

@@ -10,11 +10,13 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class LeitorExcel {
 
-    private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter DTF =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public List<Compra> extrairCompras(InputStream arquivo) {
         List<Compra> compras = new ArrayList<>();
@@ -32,13 +34,13 @@ public class LeitorExcel {
 
                 System.out.println("Lendo linha " + row.getRowNum());
 
-                Integer id_compra         = getInt(row, 0);
-                String data_hora_transacao= getDateAsText(row.getCell(1), fmt); // trata numérico como data
-                Double valor_transacao    = getDouble(row, 2);
-                Integer id_empresa        = getInt(row, 3);
-                String tipo_transacao     = getString(row, 4, fmt);
-                String cidade             = getString(row, 5, fmt);
-                Integer fraude            = getInt(row, 6);
+                Integer id_compra          = getInt(row, 0);
+                String  data_hora_transacao= getDateAsText(row.getCell(1), fmt); // trata numérico como data
+                Double  valor_transacao    = getDouble(row, 2);
+                Integer id_empresa         = getInt(row, 3);
+                String  tipo_transacao     = getString(row, 4, fmt);
+                String  cidade             = getString(row, 5, fmt);
+                Integer fraude             = getInt(row, 6);
 
                 if (id_compra == null) continue;
 
@@ -64,7 +66,7 @@ public class LeitorExcel {
         }
     }
 
-    // ---------- helpers de leitura seguros ----------
+    // -------- helpers de leitura seguros --------
 
     private static Integer getInt(Row r, int idx) {
         Cell c = r.getCell(idx);
@@ -72,7 +74,7 @@ public class LeitorExcel {
         try {
             return switch (c.getCellType()) {
                 case NUMERIC -> (int) c.getNumericCellValue();
-                case STRING  -> {
+                case STRING -> {
                     String s = c.getStringCellValue().trim();
                     yield s.isEmpty() ? null : Integer.parseInt(s);
                 }
@@ -93,7 +95,7 @@ public class LeitorExcel {
         try {
             return switch (c.getCellType()) {
                 case NUMERIC -> c.getNumericCellValue();
-                case STRING  -> {
+                case STRING -> {
                     String s = c.getStringCellValue().trim().replace(",", ".");
                     yield s.isEmpty() ? null : Double.parseDouble(s);
                 }
@@ -111,16 +113,23 @@ public class LeitorExcel {
     private static String getString(Row r, int idx, DataFormatter fmt) {
         Cell c = r.getCell(idx);
         if (c == null) return null;
-        String v = fmt.formatCellValue(c);
-        return v != null && !v.isBlank() ? v.trim() : null;
+        try {
+            String v = fmt.formatCellValue(c);
+            return v != null && !v.isBlank() ? v.trim() : null;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private static String getDateAsText(Cell c, DataFormatter fmt) {
         if (c == null) return null;
         try {
             if (c.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(c)) {
-                var date = c.getDateCellValue();
-                LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()), ZoneId.systemDefault());
+                Date date = c.getDateCellValue();
+                LocalDateTime ldt = LocalDateTime.ofInstant(
+                        Instant.ofEpochMilli(date.getTime()),
+                        ZoneId.systemDefault()
+                );
                 return ldt.format(DTF);
             }
             // se não for data numérica, usa formatação textual do Excel
@@ -132,18 +141,17 @@ public class LeitorExcel {
     }
 
     private void printarCabecalho(Row row, DataFormatter fmt) {
-        printarLinhas();
-        System.out.println("Lendo cabecalho");
+        System.out.println("Colunas do cabecalho:");
         short last = row.getLastCellNum();
         for (int i = 0; i < last; i++) {
             Cell c = row.getCell(i);
             String coluna = c == null ? "(null)" : fmt.formatCellValue(c);
-            System.out.println("Coluna " + i + ": " + coluna);
+            System.out.println("coluna " + i + ": " + coluna);
         }
         printarLinhas();
     }
 
     private void printarLinhas() {
-        System.out.println("--------------------");
+        System.out.println("---------------------");
     }
 }
