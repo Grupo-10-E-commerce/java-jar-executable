@@ -1,91 +1,149 @@
 package school.sptech;
 
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class LeitorExcel {
 
-    public List<Compra> extrairCompras(String requisicao) {
+    private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    public List<Compra> extrairCompras(InputStream arquivo) {
         List<Compra> compras = new ArrayList<>();
+        DataFormatter fmt = new DataFormatter();
 
-        try (
-                InputStream arquivo = new FileInputStream(requisicao);
-                Workbook workbook = new XSSFWorkbook(arquivo) // caso seja .xls troque para HSSFWorkbook
-        ) {
+        try (Workbook wb = new XSSFWorkbook(arquivo)) {
+            System.out.println("Iniciando leitura do InputStream");
 
-            System.out.printf("Iniciando leitura do arquivo %s%n", requisicao);
-
-            Sheet sheet = workbook.getSheetAt(0);
+            Sheet sheet = wb.getSheetAt(0);
             for (Row row : sheet) {
                 if (row.getRowNum() == 0) {
-                    printarCabecalho(row);
+                    printarCabecalho(row, fmt);
                     continue;
                 }
 
-                // Extraindo valor das células e criando objeto Livro
                 System.out.println("Lendo linha " + row.getRowNum());
 
-                Integer id_compra = (int) row.getCell(0).getNumericCellValue();
+                Integer id_compra         = getInt(row, 0);
+                String data_hora_transacao= getDateAsText(row.getCell(1), fmt); // trata numérico como data
+                Double valor_transacao    = getDouble(row, 2);
+                Integer id_empresa        = getInt(row, 3);
+                String tipo_transacao     = getString(row, 4, fmt);
+                String cidade             = getString(row, 5, fmt);
+                Integer fraude            = getInt(row, 6);
 
-                String data_hora_transacao = row.getCell(1).getStringCellValue();
+                if (id_compra == null) continue;
 
-                Double valor_transacao = row.getCell(2).getNumericCellValue();
-                Integer id_empresa = (int) row.getCell(3).getNumericCellValue();
-                String tipo_transacao = "";
-                if(row.getCell(4).getCellType() == CellType.STRING){
-                    tipo_transacao = row.getCell(4).getStringCellValue();
-                } else if (row.getCell(4).getCellType() == CellType.STRING) {
-                    tipo_transacao = row.getCell(4).getStringCellValue();
-                }else {
-                    tipo_transacao = null;
-                }
-                String cidade = "";
-                if(row.getCell(5).getCellType() == CellType.STRING){
-                    cidade = row.getCell(5).getStringCellValue();
-                } else if (row.getCell(5).getCellType() == CellType.STRING) {
-                    cidade = row.getCell(5).getStringCellValue();
-                }else {
-                    cidade = null;
-                }
-                Integer fraude = (int) row.getCell(6).getNumericCellValue();
-
-                Compra compra = new Compra(id_compra, data_hora_transacao, valor_transacao, id_empresa, tipo_transacao, cidade, fraude);
-                compras.add(compra);
+                compras.add(new Compra(
+                        id_compra,
+                        data_hora_transacao,
+                        valor_transacao,
+                        id_empresa,
+                        tipo_transacao,
+                        cidade,
+                        fraude
+                ));
             }
 
             printarLinhas();
             System.out.println("Leitura do arquivo finalizada");
             printarLinhas();
-
             return compras;
+
         } catch (IOException e) {
+            System.out.println("[ERRO] Falha lendo XLSX: " + e.getMessage());
             return compras;
         }
     }
 
-    private void printarCabecalho(Row row) {
+    // ---------- helpers de leitura seguros ----------
+
+    private static Integer getInt(Row r, int idx) {
+        Cell c = r.getCell(idx);
+        if (c == null) return null;
+        try {
+            return switch (c.getCellType()) {
+                case NUMERIC -> (int) c.getNumericCellValue();
+                case STRING  -> {
+                    String s = c.getStringCellValue().trim();
+                    yield s.isEmpty() ? null : Integer.parseInt(s);
+                }
+                case FORMULA -> {
+                    try { yield (int) c.getNumericCellValue(); }
+                    catch (Exception ignore) { yield null; }
+                }
+                default -> null;
+            };
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static Double getDouble(Row r, int idx) {
+        Cell c = r.getCell(idx);
+        if (c == null) return null;
+        try {
+            return switch (c.getCellType()) {
+                case NUMERIC -> c.getNumericCellValue();
+                case STRING  -> {
+                    String s = c.getStringCellValue().trim().replace(",", ".");
+                    yield s.isEmpty() ? null : Double.parseDouble(s);
+                }
+                case FORMULA -> {
+                    try { yield c.getNumericCellValue(); }
+                    catch (Exception ignore) { yield null; }
+                }
+                default -> null;
+            };
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static String getString(Row r, int idx, DataFormatter fmt) {
+        Cell c = r.getCell(idx);
+        if (c == null) return null;
+        String v = fmt.formatCellValue(c);
+        return v != null && !v.isBlank() ? v.trim() : null;
+    }
+
+    private static String getDateAsText(Cell c, DataFormatter fmt) {
+        if (c == null) return null;
+        try {
+            if (c.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(c)) {
+                var date = c.getDateCellValue();
+                LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()), ZoneId.systemDefault());
+                return ldt.format(DTF);
+            }
+            // se não for data numérica, usa formatação textual do Excel
+            String v = fmt.formatCellValue(c);
+            return v != null && !v.isBlank() ? v.trim() : null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private void printarCabecalho(Row row, DataFormatter fmt) {
         printarLinhas();
-        System.out.println("Lendo cabeçalho");
-        for (int i = 0; i < 7; i++) {
-            String coluna = row.getCell(i).getStringCellValue();
+        System.out.println("Lendo cabecalho");
+        short last = row.getLastCellNum();
+        for (int i = 0; i < last; i++) {
+            Cell c = row.getCell(i);
+            String coluna = c == null ? "(null)" : fmt.formatCellValue(c);
             System.out.println("Coluna " + i + ": " + coluna);
         }
         printarLinhas();
     }
 
     private void printarLinhas() {
-        System.out.println("-".repeat(20));
+        System.out.println("--------------------");
     }
-
-
 }
