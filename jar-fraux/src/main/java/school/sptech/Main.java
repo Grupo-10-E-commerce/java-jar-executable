@@ -31,7 +31,7 @@ public class Main {
         System.out.println("INICIANDO PROCESSO DE SINCRONIZACAO COM O S3");
         System.out.println("===============================================\n");
 
-        Cron.executarLog();
+        LoggerCron.executarLog();
 
         // ===== Ler o Excel diretamente do S3  =====
         List<Compra> comprasList;

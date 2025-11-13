@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class Cron {
+public class LoggerCron {
     private static final String caminhoLogger = "/home/ubuntu/logger.txt";
     private static final DateTimeFormatter dataHora = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
