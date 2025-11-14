@@ -22,6 +22,7 @@ public class LeitorExcel {
         List<Compra> compras = new ArrayList<>();
         DataFormatter fmt = new DataFormatter();
 
+
         try (Workbook wb = new XSSFWorkbook(arquivo)) {
             System.out.println("Iniciando leitura do InputStream");
 
