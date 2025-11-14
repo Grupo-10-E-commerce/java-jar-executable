@@ -22,6 +22,7 @@ public class Main {
 
         ConexaoBD conexaoBD = new ConexaoBD();
         JdbcTemplate connection = conexaoBD.getConnection();
+        LoggerCron loggerCron = new LoggerCron(connection);
 
         S3Client s3Client = new S3Provider().getS3Client();
         String bucketName = "teste-bucket-sptech";
@@ -31,7 +32,7 @@ public class Main {
         System.out.println("INICIANDO PROCESSO DE SINCRONIZACAO COM O S3");
         System.out.println("===============================================\n");
 
-        LoggerCron.executarLog();
+        loggerCron.executarLog();
 
         // ===== Ler o Excel diretamente do S3  =====
         List<Compra> comprasList;
