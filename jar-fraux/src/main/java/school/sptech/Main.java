@@ -27,6 +27,8 @@ public class Main {
         S3Client s3Client = new S3Provider().getS3Client();
         String bucketName = "teste-bucket-sptech";
         final String keyName = "credit_card_fraud_dataset.xlsx";
+        String webhookUrl = "url-webhook";
+        SlackLogger slackLogger = new SlackLogger(connection, webhookUrl);
 
         System.out.println("\n===============================================");
         System.out.println("INICIANDO PROCESSO DE SINCRONIZACAO COM O S3");
@@ -90,6 +92,16 @@ public class Main {
                         "Compra já existente");
             }
         }
+
+        int totalFraudes = 0;
+        for (Compra compra : comprasList) {
+            Integer alertaFraude = compra.getFraude();
+            if (alertaFraude != null && alertaFraude == 1) {
+                totalFraudes++;
+            }
+        }
+
+        slackLogger.notificarResumoFraudes(totalFraudes);
 
         System.out.println("\nProcesso concluído com sucesso!");
         System.out.println("===============================================\n");
