@@ -19,6 +19,7 @@ public class Main {
     public static void main(String[] args) throws IOException {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        Integer idEmpresa = 1;
 
         ConexaoBD conexaoBD = new ConexaoBD();
         JdbcTemplate connection = conexaoBD.getConnection();
@@ -28,7 +29,7 @@ public class Main {
         String bucketName = "teste-bucket-sptech";
         final String keyName = "credit_card_fraud_dataset.xlsx";
         String webhookUrl = "url-webhook";
-        SlackLogger slackLogger = new SlackLogger(connection, webhookUrl);
+        SlackLogger slackLogger = new SlackLogger(connection, webhookUrl, idEmpresa);
 
         System.out.println("\n===============================================");
         System.out.println("INICIANDO PROCESSO DE SINCRONIZACAO COM O S3");
