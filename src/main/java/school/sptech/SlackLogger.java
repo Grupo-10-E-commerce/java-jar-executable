@@ -47,7 +47,7 @@ public class SlackLogger extends DatabaseLogger {
         enviarParaSlack("ERROR", acao, mensagem);
     }
 
-    public void notificarResumoFraudes(Integer totalFraudes) {
+    public void notificarResumoFraudes(Integer totalFraudes, Double totalPrejuizo) {
         String acao = "RESUMO_FRAUDES";
         String mensagem = "Quantidade de fraudes detectadas " + totalFraudes;
         logInfo(acao, mensagem);
@@ -56,9 +56,8 @@ public class SlackLogger extends DatabaseLogger {
     private boolean slackEstadoAtivo() {
         try {
             String sql = "SELECT slack_notificacoes_ativas FROM empresa WHERE id_empresa = ?";
-                    Boolean ativo = jdbcTemplate.queryForObject(sql, Boolean.class, idEmpresa);
 
-            return Boolean.TRUE.equals(ativo);
+            return jdbcTemplate.queryForObject(sql, Boolean.class, idEmpresa);
         } catch (EmptyResultDataAccessException e) {
             System.out.println("[WARN] Empresa " + idEmpresa + " não encontrada ao verificar estado do Slack.");
             return true;
