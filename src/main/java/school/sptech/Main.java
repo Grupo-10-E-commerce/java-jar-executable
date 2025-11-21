@@ -66,7 +66,7 @@ public class Main {
             return;
         }
 
-        // ===== Inserções no banco  =====
+        // ===== Inserções no banco =====
         for (Compra compra : comprasList) {
             if (connection.query("SELECT * FROM compra WHERE id_compra = ?",
                     new BeanPropertyRowMapper<>(Compra.class),
@@ -94,7 +94,7 @@ public class Main {
             }
         }
 
-        int totalFraudes = 0;
+        Integer totalFraudes = 0;
         for (Compra compra : comprasList) {
             Integer alertaFraude = compra.getFraude();
             if (alertaFraude != null && alertaFraude == 1) {
@@ -102,7 +102,18 @@ public class Main {
             }
         }
 
-        slackLogger.notificarResumoFraudes(totalFraudes);
+        Double totalPrejuizo = 0d;
+        for (Compra compra : comprasList) {
+            Integer alertaFraude = compra.getFraude();
+            Double valorPrejuizo = compra.getValor_transacao();
+            if(alertaFraude != null && alertaFraude == 1){
+                totalPrejuizo += valorPrejuizo;
+            }
+        }
+
+
+
+        slackLogger.notificarResumoFraudes(totalFraudes, totalPrejuizo);
 
         System.out.println("\nProcesso concluído com sucesso!");
         System.out.println("===============================================\n");
