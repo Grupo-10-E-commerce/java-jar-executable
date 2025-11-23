@@ -19,16 +19,17 @@ public class Main {
     public static void main(String[] args) throws IOException {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        Integer idEmpresa = 1;
 
         ConexaoBD conexaoBD = new ConexaoBD();
         JdbcTemplate connection = conexaoBD.getConnection();
         LoggerCron loggerCron = new LoggerCron(connection);
+        Integer idEmpresa = 1;
 
         S3Client s3Client = new S3Provider().getS3Client();
         String bucketName = "teste-bucket-sptech";
         final String keyName = "credit_card_fraud_dataset.xlsx";
         String webhookUrl = "url-webhook";
+
         SlackLogger slackLogger = new SlackLogger(connection, webhookUrl, idEmpresa);
 
         System.out.println("\n===============================================");
@@ -38,6 +39,7 @@ public class Main {
         loggerCron.executarLog();
 
         // ===== Ler o Excel diretamente do S3  =====
+
         List<Compra> comprasList;
         try {
             GetObjectRequest getObjectRequest = GetObjectRequest.builder()
@@ -76,13 +78,13 @@ public class Main {
                 LocalDateTime TransactionDate = LocalDateTime.parse(
                         compra.getData_hora_transacao().substring(0, 19), formatter);
                 Double Amount = compra.getValor_transacao();
-                Integer MerchantID = compra.getId_empresa();
+                Integer MerchantID = compra.getId_empresa(); // desconsiderando por enquanto...
                 String TransactionType = compra.getTipo_transacao();
                 String Location = compra.getCidade();
                 Integer IsFraud = compra.getFraude();
 
-                connection.update("INSERT INTO compra VALUES (DEFAULT,?,?,?,?,?,?,?)",
-                        TransactionID, MerchantID, TransactionDate, Amount, TransactionType, Location, IsFraud);
+                connection.update("INSERT INTO compra (id_compra, id_empresa, data_hora_transacao, valor_transacao, tipo_transacao, cidade, fraude) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                        TransactionID, idEmpresa, TransactionDate, Amount, TransactionType, Location, IsFraud);
 
                 sucesso("Compra " + TransactionID + " inserida no banco com sucesso.");
                 logBd(connection, TransactionID, "Inserção de compra", "SUCESSO",
@@ -94,26 +96,34 @@ public class Main {
             }
         }
 
-        Integer totalFraudes = 0;
+        String sqlAlertas = "SELECT * FROM alerta_personalizado WHERE id_empresa = ? AND ativo = 1";
+        List<AlertaPersonalizado> alertas = connection.query(sqlAlertas, new BeanPropertyRowMapper<>(AlertaPersonalizado.class), idEmpresa);
+
+        int totalFraudesGeral = 0;
+        double totalPrejuizoGeral = 0.0;
+
         for (Compra compra : comprasList) {
-            Integer alertaFraude = compra.getFraude();
-            if (alertaFraude != null && alertaFraude == 1) {
-                totalFraudes++;
+            if(compra.getFraude() != null && compra.getFraude() == 1){
+                totalFraudesGeral++;
+                if(compra.getValor_transacao() != null){
+                    totalPrejuizoGeral += compra.getValor_transacao();
+                }
+            }
+            for (AlertaPersonalizado alerta : alertas) {
+                if(alerta.slackParams(compra, formatter)) {
+                    alerta.registrarCompra(compra);
+                }
             }
         }
 
-        Double totalPrejuizo = 0d;
-        for (Compra compra : comprasList) {
-            Integer alertaFraude = compra.getFraude();
-            Double valorPrejuizo = compra.getValor_transacao();
-            if(alertaFraude != null && alertaFraude == 1){
-                totalPrejuizo += valorPrejuizo;
+        for (AlertaPersonalizado alerta : alertas) {
+            if(alerta.getTotalFraudes() > 0) {
+                slackLogger.notificarResumoAlerta(alerta);
             }
         }
 
+        slackLogger.notificarResumoFraudes(totalFraudesGeral, totalPrejuizoGeral);
 
-
-        slackLogger.notificarResumoFraudes(totalFraudes, totalPrejuizo);
 
         System.out.println("\nProcesso concluído com sucesso!");
         System.out.println("===============================================\n");

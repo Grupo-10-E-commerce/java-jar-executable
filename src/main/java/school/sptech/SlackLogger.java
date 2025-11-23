@@ -1,18 +1,19 @@
 package school.sptech;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import org.springframework.dao.EmptyResultDataAccessException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
 import java.util.Map;
-import com.fasterxml.jackson.core.JsonProcessingException;
 
-
-public class SlackLogger extends DatabaseLogger {
+public class SlackLogger {
 
     private final HttpClient httpClient;
     private final String webhookUrl;
@@ -21,7 +22,6 @@ public class SlackLogger extends DatabaseLogger {
     private final ObjectMapper mapper;
 
     public SlackLogger(JdbcTemplate jdbcTemplate, String webhookUrl, Integer idEmpresa) {
-        super(jdbcTemplate);
         this.httpClient = HttpClient.newHttpClient();
         this.webhookUrl = webhookUrl;
         this.idEmpresa = idEmpresa;
@@ -29,41 +29,99 @@ public class SlackLogger extends DatabaseLogger {
         this.mapper = new ObjectMapper();
     }
 
-    @Override
     public void logInfo(String acao, String mensagem) {
-        super.logInfo(acao, mensagem);
+        salvarLogSlack("INFO", acao, mensagem);
         enviarParaSlack("INFO", acao, mensagem);
     }
 
-    @Override
     public void logWarn(String acao, String mensagem) {
-        super.logWarn(acao, mensagem);
+        salvarLogSlack("WARN", acao, mensagem);
         enviarParaSlack("WARN", acao, mensagem);
     }
 
-    @Override
     public void logError(String acao, String mensagem) {
-        super.logError(acao, mensagem);
+        salvarLogSlack("ERROR", acao, mensagem);
         enviarParaSlack("ERROR", acao, mensagem);
     }
 
     public void notificarResumoFraudes(Integer totalFraudes, Double totalPrejuizo) {
-        String acao = "RESUMO_FRAUDES";
-        String mensagem = "Quantidade de fraudes detectadas " + totalFraudes;
+        double prejuizo = totalPrejuizo != null ? totalPrejuizo : 0.0;
+
+        String acao = "RESUMO_FRAUDES_GERAL";
+        String mensagem = String.format(
+                "Quantidade de fraudes detectadas: %d | Prejuízo total: R$ %.2f",
+                totalFraudes, prejuizo
+        );
         logInfo(acao, mensagem);
     }
 
+    public void notificarResumoAlerta(AlertaPersonalizado alerta) {
+        String acao = "RESUMO_ALERTA";
+
+        String mensagem = """
+                :bar_chart: Resumo do alerta "%s"
+                • Filtros: %s
+                • Total de fraudes: %d
+                • Prejuízo total: R$ %.2f
+                """.formatted(
+                alerta.getNomeAlerta(),
+                alerta.getDescricaoFiltros(),
+                alerta.getTotalFraudes(),
+                alerta.getTotalPrejuizo()
+        );
+
+        logInfo(acao, mensagem);
+    }
+
+    // sem usar por enquanto porque manda mensagem a cada fraude encontrada e pode ser q o chat do slack fique floodado...
+    public void notificarAlerta(AlertaPersonalizado alerta, Compra compra) {
+        String acao = "ALERTA_PERSONALIZADO";
+
+        String mensagem = """
+                :rotating_light: Alerta "%s" disparado
+                • ID Compra: %d
+                • Valor: R$ %.2f
+                • Cidade: %s
+                • Data: %s
+                """.formatted(
+                alerta.getNomeAlerta(),
+                compra.getId_compra(),
+                compra.getValor_transacao(),
+                compra.getCidade(),
+                compra.getData_hora_transacao()
+        );
+
+        logInfo(acao, mensagem);
+    }
+
+    private void salvarLogSlack(String nivel, String acao, String mensagem) {
+        try {
+            String sql = "INSERT INTO slack_log (id_empresa, data_hora, acao, nivel, mensagem) " +
+                    "VALUES (?, ?, ?, ?, ?)";
+            jdbcTemplate.update(sql,
+                    idEmpresa,
+                    LocalDateTime.now(),
+                    acao,
+                    nivel,
+                    mensagem
+            );
+        } catch (Exception e) {
+            System.out.println("[WARN] Falha ao salvar log do Slack no banco: " + e.getMessage());
+        }
+    }
+
+
     private boolean slackEstadoAtivo() {
         try {
-            String sql = "SELECT slack_notificacoes_ativas FROM empresa WHERE id_empresa = ?";
-
-            return jdbcTemplate.queryForObject(sql, Boolean.class, idEmpresa);
+            String sql = "SELECT notificacoes_ativas FROM slack_config WHERE id_empresa = ?";
+            Boolean ativo = jdbcTemplate.queryForObject(sql, Boolean.class, idEmpresa);
+            return ativo;
         } catch (EmptyResultDataAccessException e) {
-            System.out.println("[WARN] Empresa " + idEmpresa + " não encontrada ao verificar estado do Slack.");
-            return true;
+            System.out.println("[WARN] Configuração de Slack para empresa " + idEmpresa + " não encontrada.");
+            return false;
         } catch (Exception e) {
             System.out.println("[WARN] Erro ao consultar estado do Slack no banco: " + e.getMessage());
-            return true;
+            return false;
         }
     }
 
@@ -73,7 +131,7 @@ public class SlackLogger extends DatabaseLogger {
             return;
         }
 
-        if(!slackEstadoAtivo()) {
+        if (!slackEstadoAtivo()) {
             System.out.println("[INFO] Slack DESATIVADO no banco. Mensagem NÃO enviada: " + mensagem);
             return;
         }
@@ -95,7 +153,7 @@ public class SlackLogger extends DatabaseLogger {
         }
     }
 
-    private String criarJsonSlack(String texto) throws JsonProcessingException{
+    private String criarJsonSlack(String texto) throws JsonProcessingException {
         return mapper.writeValueAsString(Map.of("text", texto));
     }
 }
