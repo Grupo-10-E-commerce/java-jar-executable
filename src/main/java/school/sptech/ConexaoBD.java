@@ -6,9 +6,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import javax.sql.DataSource;
 
 public class ConexaoBD {
-    private final DataSource conexao;
+    private final DataSource conexao; // tem agregação aqui
+    private JdbcTemplate jdbcTemplate = null; // tem agregação aqui
 
     public ConexaoBD() {
+        this.jdbcTemplate = jdbcTemplate;
 
         BasicDataSource basicDataSource = new BasicDataSource();
 
@@ -20,5 +22,13 @@ public class ConexaoBD {
     }
     public JdbcTemplate getConnection(){
         return new JdbcTemplate(conexao);
+    }
+
+    public DataSource getConexao() {
+        return conexao;
+    }
+
+    public JdbcTemplate getJdbcTemplate() {
+        return jdbcTemplate;
     }
 }

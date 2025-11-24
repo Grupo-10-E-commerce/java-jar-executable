@@ -12,22 +12,26 @@ public class DatabaseLogger {
     }
 
     public void logInfo(String acao, String mensagem) {
-        log("INFO", acao, mensagem);
+        log(NivelSeveridade.INFO, acao, mensagem);
     }
 
     public void logWarn(String acao, String mensagem) {
-        log("WARN", acao, mensagem);
+        log(NivelSeveridade.WARN, acao, mensagem);
     }
 
     public void logError(String acao, String mensagem) {
-        log("ERROR", acao, mensagem);
+        log(NivelSeveridade.ERROR, acao, mensagem);
     }
 
-    private void log(String nivel, String acao, String mensagem) {
+    public void logSucesso(String acao, String mensagem) {
+        log(NivelSeveridade.SUCESSO, acao, mensagem);
+    }
+
+    protected void log(NivelSeveridade nivel, String acao, String mensagem) {
         try {
             jdbcTemplate.update(
                     "INSERT INTO log (acao, nivel_severidade, mensagem, data_hora) VALUES (?, ?, ?, ?)",
-                    acao, nivel, mensagem, LocalDateTime.now()
+                    acao, nivel.name(), mensagem, LocalDateTime.now()
             );
         } catch (Exception e) {
             // não imprimimos no console; apenas ignoramos se falhar o log

@@ -2,6 +2,8 @@ package school.sptech;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AlertaPersonalizado {
 
@@ -14,8 +16,12 @@ public class AlertaPersonalizado {
     private Integer mes;
     private Integer ano;
     private Boolean ativo;
-    private int totalFraudes;
-    private double totalPrejuizo;
+    private Integer totalFraudes;
+    private Double totalPrejuizo;
+    private List<Compra> comprasFraudulentas; // agregação
+    public AlertaPersonalizado() {
+        this.comprasFraudulentas = new ArrayList<>();
+    }
 
     public boolean slackParams(Compra compra, DateTimeFormatter formatter) {
         if (Boolean.FALSE.equals(ativo)) return false;
@@ -169,5 +175,13 @@ public class AlertaPersonalizado {
 
     public double getTotalPrejuizo() {
         return totalPrejuizo;
+    }
+
+    public List<Compra> getComprasFraudulentas() {
+        return comprasFraudulentas;
+    }
+
+    public void setComprasFraudulentas(List<Compra> comprasFraudulentas) {
+        this.comprasFraudulentas = comprasFraudulentas;
     }
 }

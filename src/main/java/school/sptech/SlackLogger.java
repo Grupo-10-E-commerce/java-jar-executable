@@ -19,6 +19,7 @@ public class SlackLogger {
     private final String webhookUrl;
     private final Integer idEmpresa;
     private final JdbcTemplate jdbcTemplate;
+    private final DatabaseLogger databaseLogger; // agregação aquiii!!
     private final ObjectMapper mapper;
 
     public SlackLogger(JdbcTemplate jdbcTemplate, String webhookUrl, Integer idEmpresa) {
@@ -26,6 +27,7 @@ public class SlackLogger {
         this.webhookUrl = webhookUrl;
         this.idEmpresa = idEmpresa;
         this.jdbcTemplate = jdbcTemplate;
+        this.databaseLogger = new DatabaseLogger(jdbcTemplate);
         this.mapper = new ObjectMapper();
     }
 

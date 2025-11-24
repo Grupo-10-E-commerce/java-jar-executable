@@ -19,9 +19,9 @@ public class Main {
     public static void main(String[] args) throws IOException {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
         ConexaoBD conexaoBD = new ConexaoBD();
         JdbcTemplate connection = conexaoBD.getConnection();
+        DatabaseLogger databaseLogger = new DatabaseLogger(connection); // agregação agui
         LoggerCron loggerCron = new LoggerCron(connection);
         Integer idEmpresa = 1;
 
@@ -39,7 +39,6 @@ public class Main {
         loggerCron.executarLog();
 
         // ===== Ler o Excel diretamente do S3  =====
-
         List<Compra> comprasList;
         try {
             GetObjectRequest getObjectRequest = GetObjectRequest.builder()
@@ -55,16 +54,16 @@ public class Main {
             }
 
             System.out.println("\nCompras sendo extraídas: " + comprasList.size());
-            logBd(connection, null, "Leitura Excel", "INFO",
+            logBd(databaseLogger, null, "Leitura Excel", NivelSeveridade.INFO,
                     "Extraídas " + comprasList.size() + " compras do Excel");
 
         } catch (S3Exception e) {
             erro("Erro ao obter arquivo do S3: " + e.getMessage());
-            logBd(connection, null, "Leitura Excel", "ERRO", e.getMessage());
+            logBd(databaseLogger, null, "Leitura Excel", NivelSeveridade.ERROR, e.getMessage());
             return;
         } catch (IOException e) {
             erro("Erro ao ler o Excel: " + e.getMessage());
-            logBd(connection, null, "Leitura Excel", "ERRO", e.getMessage());
+            logBd(databaseLogger, null, "Leitura Excel", NivelSeveridade.ERROR, e.getMessage());
             return;
         }
 
@@ -87,11 +86,11 @@ public class Main {
                         TransactionID, idEmpresa, TransactionDate, Amount, TransactionType, Location, IsFraud);
 
                 sucesso("Compra " + TransactionID + " inserida no banco com sucesso.");
-                logBd(connection, TransactionID, "Inserção de compra", "SUCESSO",
+                logBd(databaseLogger, TransactionID, "Inserção de compra", NivelSeveridade.SUCESSO,
                         "Compra " + TransactionID + " inserida");
             } else {
                 aviso("Compra " + compra.getId_compra() + " já existe no banco.");
-                logBd(connection, compra.getId_compra(), "Verificação de compra", "INFO",
+                logBd(databaseLogger, compra.getId_compra(), "Verificação de compra", NivelSeveridade.INFO,
                         "Compra já existente");
             }
         }
@@ -130,9 +129,9 @@ public class Main {
     }
 
 
-    private static void logBd(JdbcTemplate connection, Integer idCompra, String acao, String nivel, String mensagem) {
+    private static void logBd(DatabaseLogger logger, Integer idCompra, String acao, NivelSeveridade nivel, String mensagem) {
         String sql = "INSERT INTO log (id_compra_log, data_hora, acao, nivel_severidade, mensagem) VALUES (?, ?, ?, ?, ?)";
-        connection.update(sql, idCompra, LocalDateTime.now(), acao, nivel, mensagem);
+        logger.getJdbcTemplate().update(sql, idCompra, LocalDateTime.now(), acao, nivel.getCodigo(), mensagem);
     }
 
     private static void sucesso(String msg) {
