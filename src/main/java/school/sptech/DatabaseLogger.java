@@ -23,10 +23,6 @@ public class DatabaseLogger {
         log(NivelSeveridade.ERROR, acao, mensagem);
     }
 
-    public void logSucesso(String acao, String mensagem) {
-        log(NivelSeveridade.SUCESSO, acao, mensagem);
-    }
-
     protected void log(NivelSeveridade nivel, String acao, String mensagem) {
         try {
             jdbcTemplate.update(

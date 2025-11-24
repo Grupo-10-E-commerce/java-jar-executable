@@ -86,7 +86,7 @@ public class Main {
                         TransactionID, idEmpresa, TransactionDate, Amount, TransactionType, Location, IsFraud);
 
                 sucesso("Compra " + TransactionID + " inserida no banco com sucesso.");
-                logBd(databaseLogger, TransactionID, "Inserção de compra", NivelSeveridade.SUCESSO,
+                logBd(databaseLogger, TransactionID, "Inserção de compra", NivelSeveridade.INFO,
                         "Compra " + TransactionID + " inserida");
             } else {
                 aviso("Compra " + compra.getId_compra() + " já existe no banco.");

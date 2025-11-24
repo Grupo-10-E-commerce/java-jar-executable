@@ -3,8 +3,7 @@ package school.sptech;
 public enum NivelSeveridade {
     INFO("INFO", "Informação"),
     WARN("WARN", "Aviso"),
-    ERROR("ERROR", "Erro"),
-    SUCESSO("SUCESS", "Sucesso");
+    ERROR("ERROR", "Erro");
 
     private final String codigo;
     private final String descricao;
